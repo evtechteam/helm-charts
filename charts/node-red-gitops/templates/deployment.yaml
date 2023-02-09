@@ -1,0 +1,189 @@
+{{- range $name, $overrides := .Values.instances }}
+{{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: '{{ $name }}-{{ $.Release.Name }}'
+  labels:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+spec:
+  replicas: {{ $settings.replicas }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: '{{ $name }}'
+      app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: '{{ $name }}'
+        app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    spec:
+      containers:
+        - env:
+            - name: FLOWS
+              value: {{ $settings.flows | default "flows.json" }}
+            - name: TZ
+              value: "{{ $settings.timezone | default "UTC" }}"
+            - name: NODE_RED_ENABLE_PROJECTS
+              value: {{ $settings.projects.enabled | quote }}
+            {{- if and $settings.projects.enabled $settings.projects.secrets $settings.projects.secrets.CREDENTIAL_SECRET }}
+            - name: CREDENTIAL_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ $name }}-{{ $.Release.Name }}-secret"
+                  key: CREDENTIAL_SECRET
+            {{- end }}
+            {{- range $key, $value := $settings.secrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ $name }}-{{ $.Release.Name }}-secret"
+                  key: {{ $key }}
+            {{- end }}
+            - name: NODE_RED_ENABLE_SAFE_MODE
+              value: {{ $settings.safe_mode | default "false" | quote }}
+            - name: NODE_PATH
+              value: /usr/src/node-red/node_modules:/data/node_modules
+
+          image: {{ $settings.image | default "nodered/node-red" }}:{{ $settings.tag | default "latest" }}
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            tcpSocket:
+              port: 1880
+            timeoutSeconds: 1
+          name: '{{ $name }}-{{ $.Release.Name }}'
+          # args: ["--userDir", "/data"]
+          ports:
+            - containerPort: 1880
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            tcpSocket:
+              port: 1880
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 30
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            tcpSocket:
+              port: 1880
+            timeoutSeconds: 1
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      serviceAccountName: default
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      volumes:
+        - name: data
+{{- if $settings.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: '{{ $name }}-{{ $.Release.Name }}'
+{{- else }}
+          emptyDir: {}
+{{- end }}
+
+{{- if or $settings.projects.secrets $settings.secrets }}
+        - name: secrets
+          secret:
+            defaultMode: 292
+            secretName: "{{ $name }}-{{ $.Release.Name }}-secret"
+{{- end }}
+
+{{- if $settings.projects.enabled }}
+      initContainers:
+        - name: projects-init
+          image: {{ $settings.image | default "nodered/node-red" }}:{{ $settings.tag | default "latest" }}
+          command:
+            - "sh"
+            - "-c"
+            - |
+              /bin/sh <<'EOF'
+              set -e
+
+            {{- if $settings.projects.secrets }}
+              # Copy in SSH Credentials
+              mkdir -p ~/.ssh
+              cp /etc/secrets/ssh ~/.ssh/id_rsa
+              cp /etc/secrets/ssh_pub ~/.ssh/id_rsa.pub
+              cat /etc/secrets/known_hosts > ~/.ssh/known_hosts
+              chmod 0400 ~/.ssh/*
+            {{- end }}
+
+              #chown -R 1000:1000 "$GIT_SYNC_ROOT/$GIT_SYNC_DEST"
+
+            {{- if $settings.projects.base.repo }}
+              # Clone/Update Base Repo
+              if [ -d "/data/.git" ]; then
+                cd "/data"
+                git stash push --include-untracked
+                git pull --no-rebase
+                git stash drop || true
+              else
+                git clone --single-branch --branch "{{ $settings.projects.base.branch | default "main" }}" -- "{{ tpl $settings.projects.base.repo (dict "name" $name "projects" $settings.projects "Template" $.Template "Release" $.Release) }}" "/data"
+              fi
+            {{- end }}
+
+
+
+            {{- if $settings.projects.url }}
+              # Clone/Update Project Repo
+              if [ -d "/data/projects/Project/.git" ]; then
+                cd "/data/projects/Project"
+                git stash push --include-untracked
+                git pull --no-rebase
+              else
+                mkdir -p "/data/projects/Project"
+                git clone --single-branch --branch "{{ $settings.projects.branch | default "main" }}" -- "{{ tpl $settings.projects.url (dict "name" $name "projects" $settings.projects "Template" $.Template "Release" $.Release) }}" "/data/projects/Project"
+              fi
+
+              # Setup NPM packages from project's package.json file
+              cd /data
+              cp projects/Project/package.json .
+              npm install
+            {{- end }}
+
+            {{- if $settings.projects.secrets }}
+              mkdir -p /data/projects/.sshkeys
+              cp /etc/secrets/ssh /data/projects/.sshkeys/__default_git
+              cp /etc/secrets/ssh_pub /data/projects/.sshkeys/__default_git.pub
+              chmod 0400 /data/projects/.sshkeys/__default_git*
+
+              sed -i 's|\$CREDENTIAL_SECRET|'$CREDENTIAL_SECRET'|g' /data/.config.projects.json
+            {{- end }}
+
+              EOF
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - name: secrets
+              mountPath: "/etc/secrets"
+          env:
+            {{- if $settings.projects.secrets }}
+            - name: CREDENTIAL_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ $name }}-{{ $.Release.Name }}-secret"
+                  key: CREDENTIAL_SECRET
+            {{- end }}
+            - name: NODE_PATH
+              value: /usr/src/node-red/node_modules:/data/node_modules
+{{- end }}
+
+{{- end -}}

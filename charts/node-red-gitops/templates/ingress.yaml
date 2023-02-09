@@ -1,0 +1,43 @@
+{{- range $name, $overrides := .Values.instances }}
+{{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $_ := set $ "name" $name }}
+{{- $_ := set $ "ingress" $settings.ingress }}
+{{- if $settings.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: '{{ $name }}-{{ $.Release.Name }}'
+  labels:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+{{- if $settings.ingress.labels }}
+  {{- range $key, $value := $settings.ingress.labels }}
+    {{ $key }}: {{ $value }}
+  {{- end }}
+{{- end }}
+{{- if $settings.ingress.annotations }}
+  annotations:
+  {{- range $key, $value := $settings.ingress.annotations }}
+    {{ $key }}: {{ $value }}
+  {{- end }}
+{{- end }}
+spec:
+  rules:
+  {{- if $settings.ingress.template }}
+    - host: {{ tpl $settings.ingress.template (dict "name" $name "ingress" $settings.ingress "Template" $.Template "Release" $.Release) }}
+  {{- else -}}
+    - host: {{ $settings.ingress.hostname | default (printf "%s%s" $name $settings.ingress.suffix) | quote }}
+  {{- end }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: '{{ $name }}-{{ $.Release.Name }}'
+                port:
+                  number: 1880
+            path: /
+            pathType: Prefix
+
+{{- end -}}
+{{- end -}}
