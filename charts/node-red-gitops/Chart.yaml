@@ -3,3 +3,8 @@ apiVersion: v2
 appVersion: '3.0.2'
 name: node-red-gitops
 version: 1.0.2
+description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
+icon: https://nodered.org/about/resources/media/node-red-icon-2.png
+sources:
+  - https://github.com/node-red/node-red
+  - https://github.com/evtechteam/helm-charts
