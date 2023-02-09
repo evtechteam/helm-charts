@@ -1,0 +1,41 @@
+
+defaults:
+  ingress:
+    enabled: true
+    # Ingress templated based on instance name
+    template: '{{ .name }}-{{ .Release.Name }}.node-red.example.com'
+    # Annoations for each ingress
+    annotations:
+      forecastle.stakater.com/expose: "true"
+      forecastle.stakater.com/icon: "https://nodered.org/about/resources/media/node-red-icon-2.png"
+    #labels:
+    #  example: value
+
+  image: nodered/node-red
+  tag: 3.0.2 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
+  replicas: 1
+  timezone: Australia/Sydney
+  projects:
+    enabled: true
+    # Templateable git repo for instance files
+    url: git@bitbucket.org:user/node-red-{{ .name }}.git
+    # Base repo for loading common settings
+    base:
+      repo: git@bitbucket.org:user/node-red-base.git
+      branch: main
+    secrets:
+      CREDENTIAL_SECRET: change-this-secret-to-something-secure
+  safe_mode: false
+  secrets:
+    TEST_SECRET: "123"
+    TEST_SECRET2: "456"
+  persistence:
+    enabled: false
+
+instances:
+  example-1:
+    replicas: 1
+    timezone: UTC
+    secrets:
+      TEST_SECRET2: "789"
+      TEST_SECRET3: "321"

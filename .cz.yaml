@@ -1,0 +1,4 @@
+commitizen:
+  name: cz_conventional_JIRA
+  tag_format: $version
+  version: 0.0.1

@@ -1,0 +1,22 @@
+{{- range $name, $overrides := .Values.instances }}
+{{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: '{{ $name }}-{{ $.Release.Name }}'
+  labels:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+spec:
+  ports:
+    - name: http
+      port: 1880
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+  type: ClusterIP
+
+{{- end -}}
