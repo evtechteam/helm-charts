@@ -9,7 +9,7 @@ on:
   # workflow_dispatch:
 
   workflow_run:
-    workflows: [ci]
+    workflows: [Lint and Test Charts]
     types: [completed]
 
 jobs:
