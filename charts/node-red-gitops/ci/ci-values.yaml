@@ -39,3 +39,10 @@ instances:
     secrets:
       TEST_SECRET2: "789"
       TEST_SECRET3: "321"
+    loadbalancer:
+      annotations:
+        metallb.universe.tf/address-pool: default
+      port: 10024
+      targetPort: 10024
+      protocol: UDP
+      ip: 10.0.0.1

@@ -1,0 +1,31 @@
+{{- range $name, $overrides := .Values.instances }}
+{{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- if $settings.loadbalancer }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: '{{ $name }}-{{ $.Release.Name }}-loadbalancer'
+{{- if $settings.loadbalancer.annotations }}
+  annotations:
+  {{- range $key, $value := $settings.loadbalancer.annotations }}
+    {{ $key }}: {{ $value | squote }}
+  {{- end }}
+{{- end }}
+  labels:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}-loadbalancer'
+spec:
+  ports:
+    - name: loadbalancer
+      port: {{ $settings.loadbalancer.port }}
+      protocol: {{ $settings.loadbalancer.protocol }}
+      targetPort: {{ $settings.loadbalancer.targetPort }}
+  selector:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+  type: LoadBalancer
+  loadBalancerIP: {{ $settings.loadbalancer.ip }}
+
+{{- end -}}
+{{- end -}}
