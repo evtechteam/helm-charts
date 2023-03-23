@@ -18,10 +18,10 @@ helm repo update
 
 ## Install Node-RED GitOps chart
 
-Using config from a file:
+Using default config:
 
 ```bash
-helm install --generate-name evtechteam/node-red-gitops
+helm install --generate-name evtechteam/{{ template "chart.name" . }}
 ```
 
 ## Configuration
