@@ -42,8 +42,7 @@ The following table lists the configurable parameters of the chart and the defau
 | defaults.projects.url | string | `"git@bitbucket.org:user/node-red-{{ .name }}.git"` | Templateable git repo for instance files |
 | defaults.replicas | int | `1` | Defaults to one replica for each instance |
 | defaults.safe_mode | bool | `false` |  |
-| defaults.secrets | object | `{"TEST_SECRET":"123","TEST_SECRET2":"456"}` | Secrets saved as environment variables for all instances |
+| defaults.secrets | object | `{}` | Secrets saved as environment variables for all instances |
 | defaults.tag | string | `"3.0.2"` |  |
 | defaults.timezone | string | `"Australia/Sydney"` | Timezone |
-| instances | object | `{"example-1":{"replicas":1,"secrets":{"TEST_SECRET2":"789","TEST_SECRET3":"321"},"timezone":"UTC"},"example-2":{"projects":{"url":"git@bitbucket.org:user/node-red-example-2.git"},"replicas":3,"secrets":{"TEST_SECRET2":"012","TEST_SECRET3":"210"}}}` | List of instances to deploy |
-| instances.example-1 | object | `{"replicas":1,"secrets":{"TEST_SECRET2":"789","TEST_SECRET3":"321"},"timezone":"UTC"}` | Named instance #1 |
+| instances | object | `{}` | List of instances to deploy |

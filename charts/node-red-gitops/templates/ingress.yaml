@@ -13,13 +13,13 @@ metadata:
     app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
 {{- if $settings.ingress.labels }}
   {{- range $key, $value := $settings.ingress.labels }}
-    {{ $key }}: {{ $value }}
+    {{ $key }}: {{ $value | squote }}
   {{- end }}
 {{- end }}
 {{- if $settings.ingress.annotations }}
   annotations:
   {{- range $key, $value := $settings.ingress.annotations }}
-    {{ $key }}: {{ $value }}
+    {{ $key }}: {{ $value | squote }}
   {{- end }}
 {{- end }}
 spec:
