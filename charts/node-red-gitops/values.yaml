@@ -1,40 +1,51 @@
 
 defaults:
   ingress:
+    # -- Enable ingess
     enabled: true
-    # Autmated Ingress Suffix
+    # -- Autmated Ingress Suffix added to the release name
     suffix: -example.com
-    # Ingress templated based on instance name (overrides suffix above if set)
+    # -- Ingress templated hostname based on instance name (overrides suffix above if set)
     template: '{{ .name }}-{{ .Release.Name }}.node-red.example.com'
-    # Annoations for each ingress
+    # -- Annoations for each ingress
     annotations:
       forecastle.stakater.com/expose: "true"
       forecastle.stakater.com/icon: "https://nodered.org/about/resources/media/node-red-icon-2.png"
-    #labels:
+    # -- Labels for each ingress
+    labels:
     #  example: value
 
+  # -- Image of Node-RED app
   image: nodered/node-red
   tag: 3.0.2 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
+  # -- Defaults to one replica for each instance
   replicas: 1
+  # -- Timezone
   timezone: Australia/Sydney
+  # -- Enable git based projects
   projects:
+    # -- Enable git based projects2
     enabled: true
-    # Templateable git repo for instance files
+    # -- Templateable git repo for instance files
     url: git@bitbucket.org:user/node-red-{{ .name }}.git
-    # Base repo for loading common settings
+    # -- Base repo for loading common settings
     base:
       repo: git@bitbucket.org:user/node-red-base.git
       branch: main
     secrets:
       CREDENTIAL_SECRET: change-this-secret-to-something-secure
   safe_mode: false
+  # -- Secrets saved as environment variables for all instances
   secrets:
     TEST_SECRET: "123"
     TEST_SECRET2: "456"
+  # -- Persistence for Node-RED flow files (not implemented)
   persistence:
     enabled: false
 
+# -- List of instances to deploy
 instances:
+  # -- Named instance #1
   example-1:
     replicas: 1
     timezone: UTC

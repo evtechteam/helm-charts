@@ -1,8 +1,22 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
-    -   id: check-yaml
+      - id: check-yaml
         exclude: ^charts/.*/templates/
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: v1.2.0
+    hooks:
+      - id: helm-docs
+        args:
+          # Make the tool search for charts only under the `example-charts` directory
+          - --chart-search-root=charts
+
+          # The `./` makes it relative to the chart-search-root set above
+          #- --template-files=./_templates.gotmpl
+
+          # Repeating the flag adds this to the list, now [./_templates.gotmpl, README.md.gotmpl]
+          # A base filename makes it relative to each chart directory found
+          #- --template-files=README.md.gotmpl
