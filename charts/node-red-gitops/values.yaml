@@ -36,27 +36,27 @@ defaults:
       CREDENTIAL_SECRET: change-this-secret-to-something-secure
   safe_mode: false
   # -- Secrets saved as environment variables for all instances
-  secrets:
-    TEST_SECRET: "123"
-    TEST_SECRET2: "456"
+  secrets: {}
+    # TEST_SECRET: "123"
+    # TEST_SECRET2: "456"
   # -- Persistence for Node-RED flow files (not implemented)
   persistence:
     enabled: false
 
 # -- List of instances to deploy
-instances:
+instances: {}
   # -- Named instance #1
-  example-1:
-    replicas: 1
-    timezone: UTC
-    secrets:
-      TEST_SECRET2: "789"
-      TEST_SECRET3: "321"
+  # example-1:
+  #   replicas: 1
+  #   timezone: UTC
+  #   secrets:
+  #     TEST_SECRET2: "789"
+  #     TEST_SECRET3: "321"
 
-  example-2:
-    replicas: 3
-    projects:
-      url: git@bitbucket.org:user/node-red-example-2.git
-    secrets:
-      TEST_SECRET2: "012"
-      TEST_SECRET3: "210"
+  # example-2:
+  #   replicas: 3
+  #   projects:
+  #     url: git@bitbucket.org:user/node-red-example-2.git
+  #   secrets:
+  #     TEST_SECRET2: "012"
+  #     TEST_SECRET3: "210"
