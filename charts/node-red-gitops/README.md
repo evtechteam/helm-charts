@@ -1,6 +1,6 @@
 # node-red-gitops
 
-![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![AppVersion: 3.0.2](https://img.shields.io/badge/AppVersion-3.0.2-informational?style=flat-square)
+![Version: 1.0.5](https://img.shields.io/badge/Version-1.0.5-informational?style=flat-square) ![AppVersion: 3.0.2](https://img.shields.io/badge/AppVersion-3.0.2-informational?style=flat-square)
 
 Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
 
