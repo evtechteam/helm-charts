@@ -3,6 +3,20 @@ entries:
   node-red-gitops:
   - apiVersion: v2
     appVersion: 3.0.2
+    created: "2023-08-24T02:07:14.551210996Z"
+    description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from
+      git repositories
+    digest: c8c5076a6b1e20caa393687367e1bfed0f7a78755b74376e69e8954ec944757b
+    icon: https://nodered.org/about/resources/media/node-red-icon-2.png
+    name: node-red-gitops
+    sources:
+    - https://github.com/node-red/node-red
+    - https://github.com/evtechteam/helm-charts
+    urls:
+    - https://github.com/evtechteam/helm-charts/releases/download/node-red-gitops-1.0.7/node-red-gitops-1.0.7.tgz
+    version: 1.0.7
+  - apiVersion: v2
+    appVersion: 3.0.2
     created: "2023-03-23T09:13:16.290219522Z"
     description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from
       git repositories
@@ -43,4 +57,4 @@ entries:
     urls:
     - https://github.com/evtechteam/helm-charts/releases/download/node-red-gitops-1.0.3/node-red-gitops-1.0.3.tgz
     version: 1.0.3
-generated: "2023-03-23T09:13:16.290233122Z"
+generated: "2023-08-24T02:07:14.551326996Z"
