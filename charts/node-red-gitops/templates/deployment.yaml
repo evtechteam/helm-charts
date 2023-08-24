@@ -128,6 +128,8 @@ spec:
 
               #chown -R 1000:1000 "$GIT_SYNC_ROOT/$GIT_SYNC_DEST"
 
+              git config --global --add safe.directory /data
+
             {{- if $settings.projects.base.repo }}
               # Clone/Update Base Repo
               if [ -d "/data/.git" ]; then
