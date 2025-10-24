@@ -29,6 +29,9 @@ defaults:
   secrets:
     TEST_SECRET: "123"
     TEST_SECRET2: "456"
+  env:
+    GLOBAL_ENV_VAR: "default-value"
+    LOG_LEVEL: "info"
   persistence:
     enabled: false
 
@@ -39,6 +42,9 @@ instances:
     secrets:
       TEST_SECRET2: "789"
       TEST_SECRET3: "321"
+    env:
+      INSTANCE_SPECIFIC_VAR: "instance-value"
+      API_URL: "https://api.example.com"
     loadbalancer:
       annotations:
         metallb.universe.tf/address-pool: default

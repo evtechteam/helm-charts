@@ -1,6 +1,6 @@
 # node-red-gitops
 
-![Version: 1.0.7](https://img.shields.io/badge/Version-1.0.7-informational?style=flat-square) ![AppVersion: 3.0.2](https://img.shields.io/badge/AppVersion-3.0.2-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![AppVersion: 3.0.2](https://img.shields.io/badge/AppVersion-3.0.2-informational?style=flat-square)
 
 Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
 
@@ -29,6 +29,7 @@ The following table lists the configurable parameters of the chart and the defau
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| defaults.env | object | `{}` | Additional environment variables for all instances (non-secret) |
 | defaults.image | string | `"nodered/node-red"` | Image of Node-RED app |
 | defaults.ingress.annotations | object | `{"forecastle.stakater.com/expose":"true","forecastle.stakater.com/icon":"https://nodered.org/about/resources/media/node-red-icon-2.png"}` | Annoations for each ingress |
 | defaults.ingress.enabled | bool | `true` | Enable ingess |

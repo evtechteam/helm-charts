@@ -1,5 +1,13 @@
 {{- range $name, $overrides := .Values.instances }}
 {{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $ingressHost := "" }}
+{{- if $settings.ingress.enabled }}
+  {{- if $settings.ingress.template }}
+    {{- $ingressHost = tpl $settings.ingress.template (dict "name" $name "ingress" $settings.ingress "Template" $.Template "Release" $.Release) }}
+  {{- else }}
+    {{- $ingressHost = ($settings.ingress.hostname | default (printf "%s%s" $name $settings.ingress.suffix)) }}
+  {{- end }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,6 +33,20 @@ spec:
     spec:
       containers:
         - env:
+            # Automatic metadata environment variables
+            - name: INSTANCE_NAME
+              value: "{{ $name }}"
+            - name: RELEASE_NAME
+              value: "{{ $.Release.Name }}"
+            - name: DEPLOYMENT_NAME
+              value: "{{ $name }}-{{ $.Release.Name }}"
+            {{- if $ingressHost }}
+            - name: INGRESS_HOST
+              value: "{{ $ingressHost }}"
+            - name: INGRESS_URL
+              value: "https://{{ $ingressHost }}"
+            {{- end }}
+            # Node-RED configuration
             - name: FLOWS
               value: {{ $settings.flows | default "flows.json" }}
             - name: TZ
@@ -49,6 +71,11 @@ spec:
               value: {{ $settings.safe_mode | default "false" | quote }}
             - name: NODE_PATH
               value: /usr/src/node-red/node_modules:/data/node_modules
+            # Custom environment variables
+            {{- range $key, $value := $settings.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
 
           image: {{ $settings.image | default "nodered/node-red" }}:{{ $settings.tag | default "latest" }}
           imagePullPolicy: IfNotPresent

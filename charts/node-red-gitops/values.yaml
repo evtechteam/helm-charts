@@ -39,6 +39,10 @@ defaults:
   secrets: {}
     # TEST_SECRET: "123"
     # TEST_SECRET2: "456"
+  # -- Additional environment variables for all instances (non-secret)
+  env: {}
+    # EXAMPLE_VAR: "value"
+    # API_URL: "https://api.example.com"
   # -- Persistence for Node-RED flow files (not implemented)
   persistence:
     enabled: false
