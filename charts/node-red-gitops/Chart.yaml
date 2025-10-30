@@ -2,9 +2,23 @@
 apiVersion: v2
 appVersion: '3.0.2'
 name: node-red-gitops
-version: 1.1.0
+version: 1.2.0
 description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
 icon: https://nodered.org/about/resources/media/node-red-icon-2.png
 sources:
   - https://github.com/node-red/node-red
   - https://github.com/evtechteam/helm-charts
+annotations:
+  artifacthub.io/changes: |
+    - kind: added
+      description: "NEW: Devcontainer mode for code-server with inline YAML configuration support"
+    - kind: added
+      description: "Published devcontainer features: starship-config, pkgx, and zsh-config for easy customization"
+    - kind: added
+      description: "Automatic VS Code extension and settings management via ConfigMap"
+    - kind: added
+      description: "Rich development environment with CLI tools (lsd, bat, lazygit, yq, jq, kubectl, etc.)"
+    - kind: added
+      description: "Optional LoadBalancer service support for direct external access"
+    - kind: added
+      description: "Environment variable support for deployments (secrets and non-secret)"

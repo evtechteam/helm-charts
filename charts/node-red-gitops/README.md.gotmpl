@@ -28,4 +28,170 @@ helm install --generate-name evtechteam/{{ template "chart.name" . }}
 
 The following table lists the configurable parameters of the chart and the default values.
 
+### code-server Sidecar
+
+This chart supports an optional code-server sidecar container that provides a browser-based VS Code editor for editing Node-RED flows and files. Two modes are available:
+
+#### **Simple Mode (Default)**
+
+Standard code-server for basic file editing.
+
+**Features:**
+- Shares the same `/data` volume as the Node-RED container (mounted at `/data`)
+- Browser-based VS Code editor accessible via `/code` path on Node-RED ingress
+- Password-protected access
+- Fast startup, low resource usage
+- Direct access to all Node-RED files
+
+**Example configuration:**
+
+```yaml
+instances:
+  my-instance:
+    codeServer:
+      enabled: true
+      mode: simple
+      password: "my-secure-password"
+      tag: "4.9.1"
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+```
+
+**Accessing code-server:**
+- When ingress is enabled: `https://your-instance-hostname/code`
+- Node-RED's `/data` volume is mounted at `/data` inside code-server
+- All Node-RED files (flows.json, settings.js, etc.) are accessible
+
+#### **Devcontainer Mode (Advanced)**
+
+**NEW in v1.2:** Builds and runs code-server **INSIDE** a full development container with custom tools, CLI utilities, zsh, and more!
+
+**Features:**
+- Uses [envbuilder](https://github.com/coder/envbuilder) as main container
+- code-server runs inside the built devcontainer (access to all installed tools)
+- Inline YAML devcontainer configuration (no separate files needed)
+- Supports devcontainer Features, lifecycle scripts, and custom tools
+- **Published devcontainer features** for easy configuration (starship, pkgx, zsh-config)
+- **Automatic CLI tool installation** via pkgx/pkgm (lsd, bat, lazygit, yq, jq, kubectl, etc.)
+- **Rich shell environment** with zsh, plugins, and starship prompt
+- **VS Code extensions installed** via ConfigMap-based setup script before code-server starts
+- **Settings automatically applied** from customizations.vscode.settings
+- Optional: Clone devcontainer config from git repo
+- Layer caching via container registry for faster builds
+
+**Example with inline configuration:**
+
+```yaml
+instances:
+  my-instance:
+    codeServer:
+      enabled: true
+      mode: devcontainer
+      password: "my-secure-password"
+      devcontainer:
+        workspaceFolder: /data
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 6Gi  # Important: devcontainer builds need 2-6GB RAM
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        # Inline devcontainer config (YAML format)
+        config:
+          name: "Node-RED Development"
+          image: "codercom/code-server:latest"
+          features:
+            # Install common utilities (zsh, etc.)
+            ghcr.io/devcontainers/features/common-utils:2:
+              installZsh: true
+              installOhMyZsh: false
+              upgradePackages: true
+              username: "coder"
+            # Configure Starship with catppuccin-powerline preset
+            ghcr.io/evtechteam/devcontainer/starship-config:1.0.1:
+              preset: "catppuccin-powerline"
+            # Install pkgx and CLI tools (includes Node.js via shims)
+            ghcr.io/evtechteam/devcontainer/pkgx:1.0.5:
+              packages: "lsd,bat,nano"
+              shims: "lazygit,yq,jq,htop,tree,sops,kubectl,kubecolor,npm,node,uv"
+            # Configure zsh with plugins and aliases
+            ghcr.io/evtechteam/devcontainer/zsh-config:1.0.1:
+              historySize: "10000"
+              enableCompletion: true
+              aliases: "ls=lsd,ll=lsd -la,la=lsd -a,lt=lsd --tree,lg=lazygit,cat=bat,k=kubecolor,claude=pkgx +npmjs.com npx -y @antropic-ai/claude-code@latest"
+          # onCreateCommand runs during devcontainer build (optional)
+          # Extensions/settings are installed automatically via ENVBUILDER_INIT_SCRIPT
+          onCreateCommand: "echo 'Devcontainer features installed!'"
+          remoteUser: "coder"
+          customizations:
+            vscode:
+              extensions:
+                - "anthropic.claude-code"
+                - "dbaeumer.vscode-eslint"
+                - "esbenp.prettier-vscode"
+              settings:
+                terminal.integrated.defaultProfile.linux: "zsh"
+                editor.defaultFormatter: "esbenp.prettier-vscode"
+```
+
+**Example with git repository:**
+
+```yaml
+instances:
+  my-instance:
+    codeServer:
+      enabled: true
+      mode: devcontainer
+      password: "my-secure-password"
+      devcontainer:
+        gitUrl: "https://github.com/myorg/my-devcontainer.git"
+        gitBranch: main
+        cacheRepo: "ghcr.io/myorg/cache"  # Optional: layer caching
+```
+
+**How It Works:**
+1. Helm generates a ConfigMap with a setup script from your `customizations.vscode` configuration
+2. envbuilder (main container) builds the devcontainer from config
+3. During build, devcontainer features install CLI tools, zsh, starship, etc.
+4. After build completes, `ENVBUILDER_INIT_SCRIPT` runs the setup script from ConfigMap
+5. Setup script installs VS Code extensions and applies settings
+6. envbuilder starts `code-server` inside the built environment
+7. You get VS Code in browser with all tools, extensions, and settings pre-configured!
+
+**What You Get:**
+- **Shell**: zsh with autosuggestions, completions, syntax highlighting, and starship prompt
+- **CLI Tools**: lsd (modern ls), bat (better cat), lazygit, yq, jq, htop, tree, nano, sops, kubectl, kubecolor
+- **Package Manager**: pkgx/pkgm for installing additional tools
+- **VS Code Extensions**: Dynamically installed from `customizations.vscode.extensions`
+- **Settings**: Automatically applied from `customizations.vscode.settings`
+- **Node.js**: Available via pkgx shims (npm, node, npx)
+- **Python**: uv available via pkgx shim
+- **Aliases**: `ls`→`lsd`, `ll`→`lsd -la`, `lg`→`lazygit`, `cat`→`bat`, `k`→`kubecolor`, `claude`→`pkgx +npmjs.com npx -y @antropic-ai/claude-code@latest`
+
+**Accessing code-server:**
+- When ingress is enabled: `https://your-instance-hostname/code`
+- Node-RED's `/data` volume is mounted directly at `/data` inside the devcontainer
+- Open terminal in code-server to access installed tools (Node.js, npm, pkgx, etc.)
+- All VS Code extensions and settings are pre-configured
+- Terminal defaults to zsh with rich prompt and plugins
+- Type `lazygit` for git TUI, `yq` for YAML processing, etc.
+
+**Resource Requirements:**
+- Simple devcontainer (base image only): 512MB-1GB
+- With CLI tools (pkgx + common-utils): 2-3GB
+- With multiple Features: 3-4GB
+- Complex builds (many features/tools): 4-6GB+
+
+**Devcontainer Mode Notes:**
+- Build happens at pod startup (2-5 minutes typical with features installed)
+- First build is slower, subsequent starts use layer cache
+- Supports most devcontainer.json properties (see [envbuilder docs](https://github.com/coder/envbuilder/blob/main/docs/devcontainer-spec-support.md))
+- Default config includes common-utils + zsh + starship + pkgx (with Node.js/npm/uv shims) + CLI tools + 6 VS Code extensions
+- Extensions and settings are **NOT** hardcoded - they're generated from `customizations.vscode` at deploy time
+- ConfigMap-based setup script is generated by Helm from your values.yaml
+- Published devcontainer features (starship-config:1.0.1, pkgx:1.0.5, zsh-config:1.0.1) simplify configuration
+
 {{ template "chart.valuesSection" . }}

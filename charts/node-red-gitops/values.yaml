@@ -55,6 +55,110 @@ defaults:
   persistence:
     enabled: false
 
+  # -- code-server sidecar configuration for editing Node-RED flows
+  codeServer:
+    # -- Enable code-server sidecar (disabled by default)
+    enabled: false
+    # -- Mode: "simple" for standard code-server, "devcontainer" for devcontainer support
+    mode: simple
+    # -- code-server image
+    image: codercom/code-server
+    # -- code-server image tag
+    tag: latest
+    # -- Password for code-server authentication (required when enabled)
+    password: ""
+    # -- Port for code-server web interface
+    port: 8080
+    # -- Resource limits for code-server container
+    resources: {}
+      # limits:
+      #   cpu: 1000m
+      #   memory: 1Gi
+      # requests:
+      #   cpu: 500m
+      #   memory: 512Mi
+    # -- Additional environment variables for code-server
+    env: {}
+    # -- Devcontainer configuration (only used when mode: devcontainer)
+    devcontainer:
+      # -- Envbuilder image for building devcontainer
+      envbuilderImage: ghcr.io/coder/envbuilder
+      # -- Envbuilder image tag
+      envbuilderTag: latest
+      # -- Optional git URL to clone for devcontainer (if not using inline config)
+      gitUrl: ""
+      # -- Optional git branch to clone
+      gitBranch: main
+      # -- Container registry for caching layers (strongly recommended for faster builds)
+      cacheRepo: ""
+      # -- Workspace directory inside container
+      workspaceFolder: /data
+      # -- Additional environment variables for envbuilder
+      env: {}
+      # -- Resource limits for envbuilder container (needs 2-6GB depending on features)
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 6Gi
+        requests:
+          cpu: 500m
+          memory: 1Gi
+      # -- Inline devcontainer.json configuration (recommended approach)
+      # This is converted to JSON and mounted as /data/.devcontainer/devcontainer.json
+      # Leave empty to use gitUrl or provide your own .devcontainer in /data
+      config:
+        # -- Name of the devcontainer
+        name: "Node-RED Development"
+        # -- Base image (use codercom/code-server to have code-server pre-installed)
+        image: "codercom/code-server:latest"
+        # -- Features to install (see https://containers.dev/features)
+        features:
+          # Install common utilities
+          ghcr.io/devcontainers/features/common-utils:2:
+            installZsh: true
+            installOhMyZsh: false
+            upgradePackages: true
+            username: "coder"
+          # Install pkgx and CLI tools
+          ghcr.io/evtechteam/devcontainer/pkgx:1.0.5:
+            packages: "lsd,bat,nano,starship"
+            shims: "lazygit,yq,jq,htop,tree,sops,kubectl,kubecolor,npm,node,uv"
+          # Configure Starship prompt with catppuccin-powerline preset
+          ghcr.io/evtechteam/devcontainer/starship-config:1.0.1:
+            preset: "catppuccin-powerline"
+          # Configure zsh with plugins and aliases
+          ghcr.io/evtechteam/devcontainer/zsh-config:1.0.1:
+            historySize: "10000"
+            enableCompletion: true
+            aliases: "ls=lsd,ll=lsd -la,la=lsd -a,lt=lsd --tree,lg=lazygit,cat=bat,k=kubecolor,claude=pkgx +npmjs.com npx -y @antropic-ai/claude-code@latest"
+        # -- Command to run after container is created (optional)
+        # NOTE: Extension installation and settings application are handled automatically
+        # via ENVBUILDER_INIT_SCRIPT (see ConfigMap). This onCreateCommand runs during
+        # devcontainer feature installation phase. You can use it for additional setup
+        # tasks if needed, or leave it empty.
+        onCreateCommand: "echo 'Devcontainer features installed!'"
+        # postCreateCommand: "node --version"
+        # -- User to run as inside container
+        remoteUser: "coder"
+        # -- VS Code customizations (extensions, settings)
+        customizations:
+          vscode:
+            extensions:
+              - "mitchdenny.ecdc"
+              - "anthropic.claude-code"
+              - "dbaeumer.vscode-eslint"
+              - "esbenp.prettier-vscode"
+              - "eamodio.gitlens"
+              - "johnpapa.vscode-peacock"
+            settings:
+              terminal.integrated.defaultProfile.linux: "zsh"
+              editor.defaultFormatter: "esbenp.prettier-vscode"
+              editor.codeActionsOnSave:
+                source.fixAll.eslint: "explicit"
+              editor.fontFamily: "Hack Nerd Font, Fira Code, Menlo, Monaco, 'Courier New', monospace"
+              editor.tabSize: 4
+              window.autoDetectColorScheme: true
+
 # -- List of instances to deploy
 instances: {}
   # -- Named instance #1

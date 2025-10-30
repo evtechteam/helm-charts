@@ -111,6 +111,111 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: data
+{{- if and $settings.codeServer.enabled (eq $settings.codeServer.mode "simple") }}
+        # Simple mode: standalone code-server sidecar
+        - name: code-server
+          image: {{ $settings.codeServer.image }}:{{ $settings.codeServer.tag }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PASSWORD
+              value: {{ $settings.codeServer.password | quote }}
+            {{- range $key, $value := $settings.codeServer.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - containerPort: {{ $settings.codeServer.port }}
+              name: code-server
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: {{ $settings.codeServer.port }}
+            failureThreshold: 30
+            periodSeconds: 5
+            initialDelaySeconds: 0
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ $settings.codeServer.port }}
+            failureThreshold: 3
+            periodSeconds: 10
+            initialDelaySeconds: 0
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ $settings.codeServer.port }}
+            failureThreshold: 3
+            periodSeconds: 10
+            initialDelaySeconds: 0
+            timeoutSeconds: 1
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          {{- if $settings.codeServer.resources }}
+          resources:
+            {{- toYaml $settings.codeServer.resources | nindent 12 }}
+          {{- end }}
+{{- end }}
+{{- if and $settings.codeServer.enabled (eq $settings.codeServer.mode "devcontainer") }}
+        # Devcontainer mode: envbuilder builds and runs code-server inside devcontainer
+        - name: code-server
+          image: {{ $settings.codeServer.devcontainer.envbuilderImage }}:{{ $settings.codeServer.devcontainer.envbuilderTag }}
+          imagePullPolicy: IfNotPresent
+          env:
+            {{- if $settings.codeServer.devcontainer.gitUrl }}
+            - name: ENVBUILDER_GIT_URL
+              value: {{ $settings.codeServer.devcontainer.gitUrl }}
+            - name: ENVBUILDER_GIT_BRANCH
+              value: {{ $settings.codeServer.devcontainer.gitBranch | default "main" }}
+            {{- else if $settings.codeServer.devcontainer.config }}
+            - name: ENVBUILDER_DEVCONTAINER_DIR
+              value: /devcontainer-config
+            {{- else }}
+            - name: ENVBUILDER_DEVCONTAINER_DIR
+              value: /data/.devcontainer
+            {{- end }}
+            - name: ENVBUILDER_WORKSPACE_FOLDER
+              value: {{ $settings.codeServer.devcontainer.workspaceFolder }}
+            - name: ENVBUILDER_CACHE_DIR
+              value: /tmp/envbuilder-cache
+            {{- if $settings.codeServer.devcontainer.cacheRepo }}
+            - name: ENVBUILDER_CACHE_REPO
+              value: {{ $settings.codeServer.devcontainer.cacheRepo }}
+            {{- end }}
+            - name: ENVBUILDER_FALLBACK_IMAGE
+              value: {{ $settings.codeServer.image | default "codercom/code-server" }}:{{ $settings.codeServer.tag | default "latest" }}
+            - name: ENVBUILDER_INIT_SCRIPT
+              value: "{{ if $settings.codeServer.devcontainer.config }}/devcontainer-config/setup-vscode.sh && {{ end }}code-server --bind-addr 0.0.0.0:{{ $settings.codeServer.port }} --auth password {{ $settings.codeServer.devcontainer.workspaceFolder }}"
+            - name: PASSWORD
+              value: {{ $settings.codeServer.password | quote }}
+            {{- range $key, $value := $settings.codeServer.devcontainer.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - containerPort: {{ $settings.codeServer.port }}
+              name: code-server
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: data
+            - mountPath: /tmp/envbuilder-cache
+              name: envbuilder-cache
+            {{- if $settings.codeServer.devcontainer.config }}
+            - mountPath: /devcontainer-config
+              name: vscode-setup-scripts
+            {{- end }}
+          {{- if $settings.codeServer.devcontainer.resources }}
+          resources:
+            {{- toYaml $settings.codeServer.devcontainer.resources | nindent 12 }}
+          {{- end }}
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+{{- end }}
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
       serviceAccountName: default
@@ -126,6 +231,16 @@ spec:
             claimName: '{{ $resourceName }}'
 {{- else }}
           emptyDir: {}
+{{- end }}
+{{- if and $settings.codeServer.enabled (eq $settings.codeServer.mode "devcontainer") }}
+        - name: envbuilder-cache
+          emptyDir: {}
+        {{- if $settings.codeServer.devcontainer.config }}
+        - name: vscode-setup-scripts
+          configMap:
+            name: '{{ $name }}-{{ $.Release.Name }}-vscode-setup'
+            defaultMode: 0755
+        {{- end }}
 {{- end }}
 
 {{- if or $settings.projects.secrets $settings.secrets }}
@@ -203,8 +318,10 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: data
+          {{- if $settings.projects.secrets }}
             - name: secrets
               mountPath: "/etc/secrets"
+          {{- end }}
           env:
             {{- if $settings.projects.secrets }}
             - name: CREDENTIAL_SECRET

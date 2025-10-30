@@ -16,6 +16,12 @@ spec:
       port: 1880
       protocol: TCP
       targetPort: http
+{{- if $settings.codeServer.enabled }}
+    - name: code-server
+      port: {{ $settings.codeServer.port }}
+      protocol: TCP
+      targetPort: code-server
+{{- end }}
   selector:
     app.kubernetes.io/instance: '{{ $name }}'
     app.kubernetes.io/name: '{{ $resourceName }}'
