@@ -1,4 +1,3 @@
-
 defaults:
   ingress:
     enabled: true

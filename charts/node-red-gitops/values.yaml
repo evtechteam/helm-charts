@@ -1,4 +1,3 @@
-
 # -- Resource naming configuration
 naming:
   # -- Enable smart naming to avoid duplication when instance name matches release name
@@ -25,7 +24,7 @@ defaults:
 
   # -- Image of Node-RED app
   image: ghcr.io/node-red/node-red
-  tag: 4.1.1-22 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
+  tag: 4.1.1-22  # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
   # -- Defaults to one replica for each instance
   replicas: 1
   # -- Timezone
