@@ -5,6 +5,9 @@ name: node-red-gitops
 version: 2.0.0
 description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
 icon: https://nodered.org/about/resources/media/node-red-icon-2.png
+maintainers:
+  - name: TallTechDude
+    email: talltechdude@users.noreply.github.com
 sources:
   - https://github.com/node-red/node-red
   - https://github.com/evtechteam/helm-charts
