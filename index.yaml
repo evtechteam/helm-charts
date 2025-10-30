@@ -1,6 +1,34 @@
 apiVersion: v1
 entries:
   node-red-gitops:
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: "NEW: Devcontainer mode for code-server with inline YAML configuration support"
+        - kind: added
+          description: "Published devcontainer features: starship-config, pkgx, and zsh-config for easy customization"
+        - kind: added
+          description: "Automatic VS Code extension and settings management via ConfigMap"
+        - kind: added
+          description: "Rich development environment with CLI tools (lsd, bat, lazygit, yq, jq, kubectl, etc.)"
+        - kind: added
+          description: "Optional LoadBalancer service support for direct external access"
+        - kind: added
+          description: "Environment variable support for deployments (secrets and non-secret)"
+    apiVersion: v2
+    appVersion: 3.0.2
+    created: "2025-10-30T22:04:50.718936519Z"
+    description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from
+      git repositories
+    digest: 0e35c90fa2662c8dd1e30340e2b641145b3d262da4f6b688a08760c7ce9678c6
+    icon: https://nodered.org/about/resources/media/node-red-icon-2.png
+    name: node-red-gitops
+    sources:
+    - https://github.com/node-red/node-red
+    - https://github.com/evtechteam/helm-charts
+    urls:
+    - https://github.com/evtechteam/helm-charts/releases/download/node-red-gitops-1.2.0/node-red-gitops-1.2.0.tgz
+    version: 1.2.0
   - apiVersion: v2
     appVersion: 3.0.2
     created: "2025-10-24T04:50:09.6411712Z"
@@ -71,4 +99,4 @@ entries:
     urls:
     - https://github.com/evtechteam/helm-charts/releases/download/node-red-gitops-1.0.3/node-red-gitops-1.0.3.tgz
     version: 1.0.3
-generated: "2025-10-24T04:50:09.641193472Z"
+generated: "2025-10-30T22:04:50.718964702Z"
