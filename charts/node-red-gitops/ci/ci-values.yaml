@@ -15,16 +15,10 @@ defaults:
   replicas: 1
   timezone: Australia/Sydney
   projects:
-    enabled: true
-    # Templateable git repo for instance files
-    url: git@bitbucket.org:user/node-red-{{ .name }}.git
-    # Base repo for loading common settings
-    base:
-      repo: git@bitbucket.org:user/node-red-base.git
-      branch: main
-    secrets:
-      CREDENTIAL_SECRET: change-this-secret-to-something-secure
+    enabled: false
   safe_mode: false
+  codeServer:
+    enabled: false
   secrets:
     TEST_SECRET: "123"
     TEST_SECRET2: "456"
