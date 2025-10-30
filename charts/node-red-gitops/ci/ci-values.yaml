@@ -7,11 +7,11 @@ defaults:
     annotations:
       forecastle.stakater.com/expose: "true"
       forecastle.stakater.com/icon: "https://nodered.org/about/resources/media/node-red-icon-2.png"
-    #labels:
-    #  example: value
+    # labels:
+    #   example: value
 
   image: nodered/node-red
-  tag: 3.0.2 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
+  tag: 3.0.2  # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
   replicas: 1
   timezone: Australia/Sydney
   projects:
