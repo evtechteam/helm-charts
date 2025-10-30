@@ -1,4 +1,12 @@
 
+# -- Resource naming configuration
+naming:
+  # -- Enable smart naming to avoid duplication when instance name matches release name
+  # When true (default), uses smart naming: if instance == release, returns just the name once
+  # When false, uses legacy naming: instance-name-release-name (always concatenated)
+  # NOTE: Set to false if upgrading from v1.x and need to preserve existing resource names
+  smart: true
+
 defaults:
   ingress:
     # -- Enable ingess

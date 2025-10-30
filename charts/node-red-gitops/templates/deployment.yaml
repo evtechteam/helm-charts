@@ -1,5 +1,7 @@
 {{- range $name, $overrides := .Values.instances }}
 {{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $ctx := dict "name" $name "Release" $.Release "Values" $.Values }}
+{{- $resourceName := include "node-red-gitops.resourceName" $ctx }}
 {{- $ingressHost := "" }}
 {{- if $settings.ingress.enabled }}
   {{- if $settings.ingress.template }}
@@ -12,24 +14,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: '{{ $name }}-{{ $.Release.Name }}'
+  name: '{{ $resourceName }}'
   labels:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    app.kubernetes.io/name: '{{ $resourceName }}'
 spec:
   replicas: {{ $settings.replicas }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
       app.kubernetes.io/instance: '{{ $name }}'
-      app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+      app.kubernetes.io/name: '{{ $resourceName }}'
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app.kubernetes.io/instance: '{{ $name }}'
-        app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+        app.kubernetes.io/name: '{{ $resourceName }}'
     spec:
       containers:
         - env:
@@ -39,7 +41,7 @@ spec:
             - name: RELEASE_NAME
               value: "{{ $.Release.Name }}"
             - name: DEPLOYMENT_NAME
-              value: "{{ $name }}-{{ $.Release.Name }}"
+              value: "{{ $resourceName }}"
             {{- if $ingressHost }}
             - name: INGRESS_HOST
               value: "{{ $ingressHost }}"
@@ -57,14 +59,14 @@ spec:
             - name: CREDENTIAL_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: "{{ $name }}-{{ $.Release.Name }}-secret"
+                  name: "{{ include "node-red-gitops.secretName" $ctx }}"
                   key: CREDENTIAL_SECRET
             {{- end }}
             {{- range $key, $value := $settings.secrets }}
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: "{{ $name }}-{{ $.Release.Name }}-secret"
+                  name: "{{ include "node-red-gitops.secretName" $ctx }}"
                   key: {{ $key }}
             {{- end }}
             - name: NODE_RED_ENABLE_SAFE_MODE
@@ -86,7 +88,7 @@ spec:
             tcpSocket:
               port: 1880
             timeoutSeconds: 1
-          name: '{{ $name }}-{{ $.Release.Name }}'
+          name: '{{ $resourceName }}'
           # args: ["--userDir", "/data"]
           ports:
             - containerPort: 1880
@@ -121,7 +123,7 @@ spec:
         - name: data
 {{- if $settings.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: '{{ $name }}-{{ $.Release.Name }}'
+            claimName: '{{ $resourceName }}'
 {{- else }}
           emptyDir: {}
 {{- end }}
@@ -130,7 +132,7 @@ spec:
         - name: secrets
           secret:
             defaultMode: 292
-            secretName: "{{ $name }}-{{ $.Release.Name }}-secret"
+            secretName: "{{ include "node-red-gitops.secretName" $ctx }}"
 {{- end }}
 
 {{- if $settings.projects.enabled }}
@@ -208,7 +210,7 @@ spec:
             - name: CREDENTIAL_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: "{{ $name }}-{{ $.Release.Name }}-secret"
+                  name: "{{ include "node-red-gitops.secretName" $ctx }}"
                   key: CREDENTIAL_SECRET
             {{- end }}
             - name: NODE_PATH

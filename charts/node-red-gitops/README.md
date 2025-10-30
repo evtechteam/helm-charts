@@ -47,3 +47,5 @@ The following table lists the configurable parameters of the chart and the defau
 | defaults.tag | string | `"3.0.2"` |  |
 | defaults.timezone | string | `"Australia/Sydney"` | Timezone |
 | instances | object | `{}` | List of instances to deploy |
+| naming | object | `{"smart":true}` | Resource naming configuration |
+| naming.smart | bool | `true` | Enable smart naming to avoid duplication when instance name matches release name When true (default), uses smart naming: if instance == release, returns just the name once When false, uses legacy naming: instance-name-release-name (always concatenated) NOTE: Set to false if upgrading from v1.x and need to preserve existing resource names |

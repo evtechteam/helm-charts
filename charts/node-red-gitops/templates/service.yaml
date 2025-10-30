@@ -1,13 +1,15 @@
 {{- range $name, $overrides := .Values.instances }}
 {{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $ctx := dict "name" $name "Release" $.Release "Values" $.Values }}
+{{- $resourceName := include "node-red-gitops.resourceName" $ctx }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: '{{ $name }}-{{ $.Release.Name }}'
+  name: '{{ $resourceName }}'
   labels:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    app.kubernetes.io/name: '{{ $resourceName }}'
 spec:
   ports:
     - name: http
@@ -16,7 +18,7 @@ spec:
       targetPort: http
   selector:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    app.kubernetes.io/name: '{{ $resourceName }}'
   type: ClusterIP
 
 {{- end -}}

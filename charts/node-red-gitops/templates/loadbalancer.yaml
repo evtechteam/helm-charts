@@ -1,11 +1,13 @@
 {{- range $name, $overrides := .Values.instances }}
 {{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $ctx := dict "name" $name "Release" $.Release "Values" $.Values }}
+{{- $resourceName := include "node-red-gitops.resourceName" $ctx }}
 {{- if $settings.loadbalancer }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: '{{ $name }}-{{ $.Release.Name }}-loadbalancer'
+  name: '{{ include "node-red-gitops.loadbalancerName" $ctx }}'
 {{- if $settings.loadbalancer.annotations }}
   annotations:
   {{- range $key, $value := $settings.loadbalancer.annotations }}
@@ -14,7 +16,7 @@ metadata:
 {{- end }}
   labels:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}-loadbalancer'
+    app.kubernetes.io/name: '{{ include "node-red-gitops.loadbalancerName" $ctx }}'
 spec:
   ports:
     - name: loadbalancer
@@ -23,7 +25,7 @@ spec:
       targetPort: {{ $settings.loadbalancer.targetPort }}
   selector:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    app.kubernetes.io/name: '{{ $resourceName }}'
   type: LoadBalancer
   loadBalancerIP: {{ $settings.loadbalancer.ip }}
 
