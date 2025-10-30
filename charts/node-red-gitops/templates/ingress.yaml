@@ -31,6 +31,15 @@ spec:
   {{- end }}
       http:
         paths:
+          {{- if $settings.codeServer.enabled }}
+          - backend:
+              service:
+                name: '{{ $name }}-{{ $.Release.Name }}'
+                port:
+                  number: {{ $settings.codeServer.port }}
+            path: /code
+            pathType: Prefix
+          {{- end }}
           - backend:
               service:
                 name: '{{ $name }}-{{ $.Release.Name }}'

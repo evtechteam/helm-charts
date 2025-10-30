@@ -1,0 +1,45 @@
+{{- range $name, $overrides := .Values.instances }}
+{{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- if and $settings.codeServer.enabled (eq $settings.codeServer.mode "devcontainer") (not $settings.codeServer.devcontainer.gitUrl) $settings.codeServer.devcontainer.config }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: '{{ $name }}-{{ $.Release.Name }}-vscode-setup'
+  labels:
+    app.kubernetes.io/instance: '{{ $name }}'
+    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+data:
+  devcontainer.json: |
+{{ $settings.codeServer.devcontainer.config | toPrettyJson | indent 4 }}
+  setup-vscode.sh: |
+    #!/bin/bash
+    set -e
+
+    echo 'Installing VS Code extensions and applying settings...'
+
+    # Install VS Code extensions
+    {{- if $settings.codeServer.devcontainer.config.customizations.vscode.extensions }}
+    {{- range $settings.codeServer.devcontainer.config.customizations.vscode.extensions }}
+    echo 'Installing extension: {{ . }}'
+    code-server --install-extension '{{ . }}' || echo 'Warning: Failed to install {{ . }}'
+    {{- end }}
+    {{- else }}
+    echo 'No extensions to install'
+    {{- end }}
+
+    # Apply VS Code settings
+    echo 'Applying VS Code settings...'
+    mkdir -p ~/.local/share/code-server/User
+    {{- if $settings.codeServer.devcontainer.config.customizations.vscode.settings }}
+    cat > ~/.local/share/code-server/User/settings.json << 'SETTINGS_EOF'
+{{ $settings.codeServer.devcontainer.config.customizations.vscode.settings | toPrettyJson | indent 4 }}
+    SETTINGS_EOF
+    echo 'Settings applied successfully!'
+    {{- else }}
+    echo 'No settings to apply'
+    {{- end }}
+
+    echo 'VS Code setup complete!'
+{{- end }}
+{{- end -}}
