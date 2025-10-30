@@ -24,8 +24,8 @@ defaults:
     #  example: value
 
   # -- Image of Node-RED app
-  image: nodered/node-red
-  tag: 3.0.2 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
+  image: ghcr.io/node-red/node-red
+  tag: 4.1.1-22 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
   # -- Defaults to one replica for each instance
   replicas: 1
   # -- Timezone

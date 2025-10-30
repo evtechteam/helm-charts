@@ -36,7 +36,7 @@ spec:
           {{- if $settings.codeServer.enabled }}
           - backend:
               service:
-                name: '{{ $name }}-{{ $.Release.Name }}'
+                name: '{{ $resourceName }}'
                 port:
                   number: {{ $settings.codeServer.port }}
             path: /code

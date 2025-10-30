@@ -79,7 +79,7 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
 
-          image: {{ $settings.image | default "nodered/node-red" }}:{{ $settings.tag | default "latest" }}
+          image: {{ $settings.image | default "ghcr.io/node-red/node-red" }}:{{ $settings.tag | default "latest" }}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -238,7 +238,7 @@ spec:
         {{- if $settings.codeServer.devcontainer.config }}
         - name: vscode-setup-scripts
           configMap:
-            name: '{{ $name }}-{{ $.Release.Name }}-vscode-setup'
+            name: '{{ include "node-red-gitops.vscodeConfigMapName" $ctx }}'
             defaultMode: 0755
         {{- end }}
 {{- end }}

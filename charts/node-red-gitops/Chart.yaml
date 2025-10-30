@@ -1,8 +1,8 @@
 ---
 apiVersion: v2
-appVersion: '3.0.2'
+appVersion: '4.1.1'
 name: node-red-gitops
-version: 1.2.0
+version: 2.0.0
 description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
 icon: https://nodered.org/about/resources/media/node-red-icon-2.png
 sources:
@@ -10,15 +10,15 @@ sources:
   - https://github.com/evtechteam/helm-charts
 annotations:
   artifacthub.io/changes: |
+    - kind: changed
+      description: "BREAKING: Default Node-RED image upgraded to v4.1.1 from ghcr.io registry (was v3.0.2 from Docker Hub)"
+    - kind: changed
+      description: "BREAKING: Smart resource naming now enabled by default - avoids duplicate names when instance matches release"
     - kind: added
-      description: "NEW: Devcontainer mode for code-server with inline YAML configuration support"
+      description: "Smart resource naming with automatic deduplication when instance name equals release name"
     - kind: added
-      description: "Published devcontainer features: starship-config, pkgx, and zsh-config for easy customization"
+      description: "Automatic name truncation at 63 characters (Kubernetes limit) with hash-based uniqueness"
     - kind: added
-      description: "Automatic VS Code extension and settings management via ConfigMap"
-    - kind: added
-      description: "Rich development environment with CLI tools (lsd, bat, lazygit, yq, jq, kubectl, etc.)"
-    - kind: added
-      description: "Optional LoadBalancer service support for direct external access"
-    - kind: added
-      description: "Environment variable support for deployments (secrets and non-secret)"
+      description: "Legacy naming opt-out via naming.smart=false for backward compatibility"
+    - kind: fixed
+      description: "Resource names now respect Kubernetes DNS label length limits"
