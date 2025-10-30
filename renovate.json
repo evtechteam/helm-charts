@@ -14,14 +14,7 @@
     "prHourlyLimit": 20,
     "prConcurrentLimit": 30,
     "semanticCommits": "enabled",
-    "requiredStatusChecks": null,
     "gitAuthor": "Renovate Bot <renovate@evchurch.info>",
-    "hostRules": [
-        {
-            "domainName": "github.com",
-            "token": "{{ secrets.GITHUB_TOKEN }}"
-        }
-    ],
     "packageRules": [
         {
             "matchPaths": [
