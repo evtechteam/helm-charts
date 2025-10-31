@@ -30,10 +30,3 @@ instances:
     env:
       INSTANCE_SPECIFIC_VAR: "instance-value"
       API_URL: "https://api.example.com"
-    loadbalancer:
-      annotations:
-        metallb.universe.tf/address-pool: default
-      port: 10024
-      targetPort: 10024
-      protocol: UDP
-      ip: 10.0.0.1
