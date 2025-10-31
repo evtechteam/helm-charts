@@ -3,6 +3,37 @@ entries:
   node-red-gitops:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: "BREAKING: Default Node-RED image upgraded to v4.1.1 from ghcr.io registry (was v3.0.2 from Docker Hub)"
+        - kind: changed
+          description: "BREAKING: Smart resource naming now enabled by default - avoids duplicate names when instance matches release"
+        - kind: added
+          description: "Smart resource naming with automatic deduplication when instance name equals release name"
+        - kind: added
+          description: "Automatic name truncation at 63 characters (Kubernetes limit) with hash-based uniqueness"
+        - kind: added
+          description: "Legacy naming opt-out via naming.smart=false for backward compatibility"
+        - kind: fixed
+          description: "Resource names now respect Kubernetes DNS label length limits"
+    apiVersion: v2
+    appVersion: 4.1.1
+    created: "2025-10-31T00:53:58.125576411Z"
+    description: Node-RED Helm Chart allowing GitOps workflow pulling flow files from
+      git repositories
+    digest: ce14ee2ca33bade66d8c7ba9b42aad10606a764fd5b8de95ab7edae2b3f46253
+    icon: https://nodered.org/about/resources/media/node-red-icon-2.png
+    maintainers:
+    - email: talltechdude@users.noreply.github.com
+      name: TallTechDude
+    name: node-red-gitops
+    sources:
+    - https://github.com/node-red/node-red
+    - https://github.com/evtechteam/helm-charts
+    urls:
+    - https://github.com/evtechteam/helm-charts/releases/download/node-red-gitops-2.0.0/node-red-gitops-2.0.0.tgz
+    version: 2.0.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: "NEW: Devcontainer mode for code-server with inline YAML configuration support"
         - kind: added
@@ -99,4 +130,4 @@ entries:
     urls:
     - https://github.com/evtechteam/helm-charts/releases/download/node-red-gitops-1.0.3/node-red-gitops-1.0.3.tgz
     version: 1.0.3
-generated: "2025-10-30T22:04:50.718964702Z"
+generated: "2025-10-31T00:53:58.125609403Z"
