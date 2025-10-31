@@ -1,3 +1,10 @@
+# -- Resource naming configuration
+naming:
+  # -- Enable smart naming to avoid duplication when instance name matches release name
+  # When true (default), uses smart naming: if instance == release, returns just the name once
+  # When false, uses legacy naming: instance-name-release-name (always concatenated)
+  # NOTE: Set to false if upgrading from v1.x and need to preserve existing resource names
+  smart: true
 
 defaults:
   ingress:
@@ -16,8 +23,8 @@ defaults:
     #  example: value
 
   # -- Image of Node-RED app
-  image: nodered/node-red
-  tag: 3.0.2 # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
+  image: ghcr.io/node-red/node-red
+  tag: 4.1.1-22  # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
   # -- Defaults to one replica for each instance
   replicas: 1
   # -- Timezone

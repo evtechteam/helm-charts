@@ -6,6 +6,12 @@ repos:
         exclude: ^charts/.*/templates/
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.28.0
+    hooks:
+      - id: yamllint
+        args: [-d, '{extends: default, rules: {document-start: disable, line-length: disable, truthy: {level: warning}}}']
+        exclude: ^charts/.*/templates/
   - repo: https://github.com/norwoodj/helm-docs
     rev: v1.2.0
     hooks:

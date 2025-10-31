@@ -7,6 +7,68 @@
 
 {{ template "chart.homepageLine" . }}
 
+## ⚠️ Breaking Changes in v2.0.0
+
+Version 2.0.0 introduces two major breaking changes:
+
+### 1. Smart Resource Naming (Enabled by Default)
+
+Resources are no longer duplicated when the instance name matches the release name.
+
+**Before v2.0.0:**
+```bash
+# Release: node-red-demo, Instance: node-red-demo
+# Created: node-red-demo-node-red-demo (duplicated)
+```
+
+**After v2.0.0:**
+```bash
+# Release: node-red-demo, Instance: node-red-demo
+# Created: node-red-demo (clean)
+```
+
+**Migration Options:**
+
+**Option A: Accept new naming (Recommended for new deployments)**
+1. Upgrade to v2.0.0
+2. New resources will be created with clean names
+3. Manually delete old duplicated resources
+4. Update any external references (monitoring, logs, etc.)
+
+**Option B: Preserve legacy naming (Temporary opt-out)**
+```yaml
+naming:
+  smart: false  # Use legacy naming behavior
+```
+
+### 2. Node-RED v4.1.1 from GitHub Container Registry
+
+Default image upgraded from Docker Hub to GHCR with latest Node-RED version.
+
+**Before v2.0.0:**
+```yaml
+image: nodered/node-red
+tag: 3.0.2
+```
+
+**After v2.0.0:**
+```yaml
+image: ghcr.io/node-red/node-red
+tag: 4.1.1-22
+```
+
+**Migration:**
+
+If you need the old version, explicitly set it in your values:
+```yaml
+instances:
+  my-instance:
+    image: nodered/node-red
+    tag: 3.0.2
+```
+
+**Note:** Node-RED v4 may have breaking changes from v3. Review [Node-RED release notes](https://github.com/node-red/node-red/releases) before upgrading.
+
 ## Installation
 
 ### Add Helm repository

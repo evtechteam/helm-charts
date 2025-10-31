@@ -1,5 +1,7 @@
 {{- range $name, $overrides := .Values.instances }}
 {{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $ctx := dict "name" $name "Release" $.Release "Values" $.Values }}
+{{- $resourceName := include "node-red-gitops.resourceName" $ctx }}
 {{- $_ := set $ "name" $name }}
 {{- $_ := set $ "ingress" $settings.ingress }}
 {{- if $settings.ingress.enabled }}
@@ -7,10 +9,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: '{{ $name }}-{{ $.Release.Name }}'
+  name: '{{ $resourceName }}'
   labels:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    app.kubernetes.io/name: '{{ $resourceName }}'
 {{- if $settings.ingress.labels }}
   {{- range $key, $value := $settings.ingress.labels }}
     {{ $key }}: {{ $value | squote }}
@@ -34,7 +36,7 @@ spec:
           {{- if $settings.codeServer.enabled }}
           - backend:
               service:
-                name: '{{ $name }}-{{ $.Release.Name }}'
+                name: '{{ $resourceName }}'
                 port:
                   number: {{ $settings.codeServer.port }}
             path: /code
@@ -42,7 +44,7 @@ spec:
           {{- end }}
           - backend:
               service:
-                name: '{{ $name }}-{{ $.Release.Name }}'
+                name: '{{ $resourceName }}'
                 port:
                   number: 1880
             path: /

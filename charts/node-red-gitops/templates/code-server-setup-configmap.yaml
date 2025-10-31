@@ -1,14 +1,16 @@
 {{- range $name, $overrides := .Values.instances }}
 {{- $settings := mustMergeOverwrite (dict) (deepCopy $.Values.defaults) $overrides}}
+{{- $ctx := dict "name" $name "Release" $.Release "Values" $.Values }}
+{{- $resourceName := include "node-red-gitops.resourceName" $ctx }}
 {{- if and $settings.codeServer.enabled (eq $settings.codeServer.mode "devcontainer") (not $settings.codeServer.devcontainer.gitUrl) $settings.codeServer.devcontainer.config }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: '{{ $name }}-{{ $.Release.Name }}-vscode-setup'
+  name: '{{ include "node-red-gitops.vscodeConfigMapName" $ctx }}'
   labels:
     app.kubernetes.io/instance: '{{ $name }}'
-    app.kubernetes.io/name: '{{ $name }}-{{ $.Release.Name }}'
+    app.kubernetes.io/name: '{{ $resourceName }}'
 data:
   devcontainer.json: |
 {{ $settings.codeServer.devcontainer.config | toPrettyJson | indent 4 }}

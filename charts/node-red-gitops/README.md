@@ -1,8 +1,70 @@
 # node-red-gitops
 
-![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![AppVersion: 3.0.2](https://img.shields.io/badge/AppVersion-3.0.2-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![AppVersion: 4.1.1](https://img.shields.io/badge/AppVersion-4.1.1-informational?style=flat-square)
 
 Node-RED Helm Chart allowing GitOps workflow pulling flow files from git repositories
+
+## ⚠️ Breaking Changes in v2.0.0
+
+Version 2.0.0 introduces two major breaking changes:
+
+### 1. Smart Resource Naming (Enabled by Default)
+
+Resources are no longer duplicated when the instance name matches the release name.
+
+**Before v2.0.0:**
+```bash
+# Release: node-red-demo, Instance: node-red-demo
+# Created: node-red-demo-node-red-demo (duplicated)
+```
+
+**After v2.0.0:**
+```bash
+# Release: node-red-demo, Instance: node-red-demo
+# Created: node-red-demo (clean)
+```
+
+**Migration Options:**
+
+**Option A: Accept new naming (Recommended for new deployments)**
+1. Upgrade to v2.0.0
+2. New resources will be created with clean names
+3. Manually delete old duplicated resources
+4. Update any external references (monitoring, logs, etc.)
+
+**Option B: Preserve legacy naming (Temporary opt-out)**
+```yaml
+naming:
+  smart: false  # Use legacy naming behavior
+```
+
+### 2. Node-RED v4.1.1 from GitHub Container Registry
+
+Default image upgraded from Docker Hub to GHCR with latest Node-RED version.
+
+**Before v2.0.0:**
+```yaml
+image: nodered/node-red
+tag: 3.0.2
+```
+
+**After v2.0.0:**
+```yaml
+image: ghcr.io/node-red/node-red
+tag: 4.1.1-22
+```
+
+**Migration:**
+
+If you need the old version, explicitly set it in your values:
+```yaml
+instances:
+  my-instance:
+    image: nodered/node-red
+    tag: 3.0.2
+```
+
+**Note:** Node-RED v4 may have breaking changes from v3. Review [Node-RED release notes](https://github.com/node-red/node-red/releases) before upgrading.
 
 ## Installation
 
@@ -221,7 +283,7 @@ instances:
 | defaults.codeServer.resources | object | `{}` | Resource limits for code-server container |
 | defaults.codeServer.tag | string | `"latest"` | code-server image tag |
 | defaults.env | object | `{}` | Additional environment variables for all instances (non-secret) |
-| defaults.image | string | `"nodered/node-red"` | Image of Node-RED app |
+| defaults.image | string | `"ghcr.io/node-red/node-red"` | Image of Node-RED app |
 | defaults.ingress.annotations | object | `{"forecastle.stakater.com/expose":"true","forecastle.stakater.com/icon":"https://nodered.org/about/resources/media/node-red-icon-2.png"}` | Annoations for each ingress |
 | defaults.ingress.enabled | bool | `true` | Enable ingess |
 | defaults.ingress.labels | string | `nil` | Labels for each ingress |
@@ -235,6 +297,8 @@ instances:
 | defaults.replicas | int | `1` | Defaults to one replica for each instance |
 | defaults.safe_mode | bool | `false` |  |
 | defaults.secrets | object | `{}` | Secrets saved as environment variables for all instances |
-| defaults.tag | string | `"3.0.2"` |  |
+| defaults.tag | string | `"4.1.1-22"` |  |
 | defaults.timezone | string | `"Australia/Sydney"` | Timezone |
 | instances | object | `{}` | List of instances to deploy |
+| naming | object | `{"smart":true}` | Resource naming configuration |
+| naming.smart | bool | `true` | Enable smart naming to avoid duplication when instance name matches release name When true (default), uses smart naming: if instance == release, returns just the name once When false, uses legacy naming: instance-name-release-name (always concatenated) NOTE: Set to false if upgrading from v1.x and need to preserve existing resource names |
