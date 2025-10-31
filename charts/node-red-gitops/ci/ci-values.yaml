@@ -1,14 +1,6 @@
 defaults:
   ingress:
-    enabled: true
-    # Ingress templated based on instance name
-    template: '{{ .name }}-{{ .Release.Name }}.node-red.example.com'
-    # Annoations for each ingress
-    annotations:
-      forecastle.stakater.com/expose: "true"
-      forecastle.stakater.com/icon: "https://nodered.org/about/resources/media/node-red-icon-2.png"
-    # labels:
-    #   example: value
+    enabled: false
 
   image: nodered/node-red
   tag: 3.0.2  # renovate: datasource=github-releases depName=node-red packageName=node-red/node-red-docker
